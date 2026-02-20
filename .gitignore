@@ -25,3 +25,4 @@ replay_pid*
 
 # example webpage downloaded for agent analysis purposes
 example-webpage/*
+!example-webpage/CLAUDE.md
