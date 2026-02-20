@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ACC Companies Enhancer</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      width: 340px;
+      padding: 16px;
+      margin: 0;
+      color: #333;
+    }
+    h1 {
+      font-size: 15px;
+      margin: 0 0 8px 0;
+    }
+    p.desc {
+      color: #666;
+      font-size: 12px;
+      margin: 0 0 12px 0;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-top: 10px;
+      margin-bottom: 2px;
+      font-size: 12px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: #0696d7;
+    }
+    button {
+      padding: 6px 18px;
+      background: #0696d7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0578ab;
+    }
+    button:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+    .btn-row {
+      margin-top: 14px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .status {
+      font-size: 12px;
+      color: #2e7d32;
+      margin-top: 6px;
+    }
+    .status.error {
+      color: #d32f2f;
+    }
+    hr {
+      margin: 14px 0;
+      border: none;
+      border-top: 1px solid #ddd;
+    }
+    h2 {
+      font-size: 13px;
+      margin: 0 0 4px 0;
+    }
+    .cache-info {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+    .cache-progress {
+      font-size: 12px;
+      color: #555;
+      margin-top: 6px;
+      max-height: 40px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body>
+  <h1>ACC Companies Enhancer</h1>
+  <p class="desc">APS credentials for the admin API.</p>
+
+  <label for="clientId">Client ID</label>
+  <input type="text" id="clientId" placeholder="e.g. abc123def456...">
+
+  <label for="clientSecret">Client Secret</label>
+  <input type="password" id="clientSecret" placeholder="e.g. xyz789...">
+
+  <label for="accountId">Account ID</label>
+  <input type="text" id="accountId" placeholder="e.g. 00000000-..." value="00000000-0000-0000-0000-000000000000">
+
+  <div class="btn-row">
+    <button id="save">Save</button>
+  </div>
+  <div id="status"></div>
+
+  <hr>
+
+  <h2>Companies Cache</h2>
+  <div id="cacheInfo" class="cache-info">Checking...</div>
+  <div class="btn-row">
+    <button id="buildCache">Build Cache</button>
+  </div>
+  <div id="cacheProgress" class="cache-progress"></div>
+
+  <script src="lib/aps-constants.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

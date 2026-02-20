@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ACC Companies Enhancer - Settings</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      padding: 20px;
+      max-width: 480px;
+      margin: 0 auto;
+      color: #333;
+    }
+    h1 {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    p.desc {
+      color: #666;
+      font-size: 13px;
+      margin-top: 0;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-top: 16px;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: #0696d7;
+    }
+    button {
+      margin-top: 20px;
+      padding: 8px 24px;
+      background: #0696d7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0578ab;
+    }
+    button:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #2e7d32;
+    }
+    .status.error {
+      color: #d32f2f;
+    }
+    hr {
+      margin-top: 24px;
+      border: none;
+      border-top: 1px solid #ddd;
+    }
+    h2 {
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+    .cache-info {
+      font-size: 13px;
+      color: #666;
+      margin-top: 8px;
+    }
+    .cache-progress {
+      font-size: 13px;
+      color: #555;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>ACC Companies Enhancer</h1>
+  <p class="desc">Enter your APS (Autodesk Platform Services) app credentials. These are used to fetch member and project details via the admin API.</p>
+
+  <label for="clientId">APS Client ID</label>
+  <input type="text" id="clientId" placeholder="e.g. abc123def456...">
+
+  <label for="clientSecret">APS Client Secret</label>
+  <input type="password" id="clientSecret" placeholder="e.g. xyz789...">
+
+  <label for="accountId">APS Account ID</label>
+  <input type="text" id="accountId" placeholder="e.g. 00000000-0000-0000-0000-000000000000" value="00000000-0000-0000-0000-000000000000">
+
+  <button id="save">Save</button>
+  <div id="status"></div>
+
+  <hr>
+
+  <h2>Companies Cache</h2>
+  <p class="desc">Pre-build a cache of all companies, projects, users, and project members for instant lookups. The cache auto-refreshes when older than 2 hours.</p>
+  <div id="cacheInfo" class="cache-info">Checking cache status...</div>
+  <button id="buildCache">Build Cache</button>
+  <div id="cacheProgress" class="cache-progress"></div>
+
+  <script src="lib/aps-constants.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
