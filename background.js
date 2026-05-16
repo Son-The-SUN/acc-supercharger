@@ -27,7 +27,6 @@ async function get2LeggedToken() {
   const data = await chrome.storage.local.get([
     "apsClientId",
     "apsClientSecret",
-    "apsAccountId",
   ]);
 
   if (!data.apsClientId || !data.apsClientSecret) {
@@ -59,10 +58,11 @@ async function get2LeggedToken() {
   const token     = tokenData.access_token;
   const expiresAt = Date.now() + tokenData.expires_in * 1000;
 
+  // Token is account-agnostic (2-legged client credentials); account IDs are
+  // read from local storage when needed, not cached in session.
   await chrome.storage.session.set({
     accBearerToken: token,
     tokenExpiresAt: expiresAt,
-    accAccountId:   data.apsAccountId,
   });
 
   console.log(
@@ -113,33 +113,43 @@ async function triggerCacheBuild() {
 
   try {
     const token = await ensureToken();
-    const { accAccountId: accountId } = await chrome.storage.session.get(["accAccountId"]);
-    if (!accountId) throw new Error("No account ID configured.");
+    const localData = await chrome.storage.local.get(["apsAccountIds"]);
+    const accountIds = localData.apsAccountIds || [];
+    if (accountIds.length === 0) throw new Error("No account IDs configured.");
 
-    const { companiesCache, projectsCache } = await buildCompaniesCache(
-      token,
-      accountId,
-      sendProgress
-    );
+    const allCompanies = [];
+    const allProjects  = [];
+
+    for (let i = 0; i < accountIds.length; i++) {
+      const accountId = accountIds[i];
+      sendProgress("account", `[${i + 1}/${accountIds.length}] Processing hub ${accountId.slice(0, 8)}...`);
+      const { companiesCache, projectsCache } = await buildCompaniesCache(
+        token,
+        accountId,
+        sendProgress
+      );
+      allCompanies.push(...companiesCache);
+      allProjects.push(...projectsCache);
+    }
 
     const now = Date.now();
     await chrome.storage.local.set({
-      companiesCache,
+      companiesCache:          allCompanies,
       companiesCacheTimestamp: now,
-      projectsCache,
+      projectsCache:           allProjects,
       projectsCacheTimestamp:  now,
     });
 
     sendProgress(
       "done",
-      `Cache built: ${companiesCache.length} companies, ${projectsCache.length} projects.`
+      `Cache built: ${allCompanies.length} companies, ${allProjects.length} projects across ${accountIds.length} hub(s).`
     );
     console.log(
-      `ACC Enhancer: cache built with ${companiesCache.length} companies,`,
-      `${projectsCache.length} projects`
+      `ACC Enhancer: cache built with ${allCompanies.length} companies,`,
+      `${allProjects.length} projects across ${accountIds.length} hub(s)`
     );
 
-    return companiesCache;
+    return allCompanies;
   } finally {
     cacheBuilding = false;
   }
@@ -151,8 +161,8 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.type === MSG.GET_TOKEN) {
     ensureToken()
       .then(async (token) => {
-        const data = await chrome.storage.session.get(["accAccountId"]);
-        sendResponse({ token, accountId: data.accAccountId });
+        const data = await chrome.storage.local.get(["apsAccountIds"]);
+        sendResponse({ token, accountIds: data.apsAccountIds || [] });
       })
       .catch((err) => sendResponse({ error: err.message }));
     return true; // keep channel open for async response

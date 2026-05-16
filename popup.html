@@ -90,6 +90,34 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    .account-id-row {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 4px;
+      align-items: center;
+    }
+    .account-id-row input {
+      flex: 1;
+    }
+    .remove-account-btn {
+      padding: 4px 8px;
+      background: #e53935;
+      font-size: 13px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .remove-account-btn:hover {
+      background: #b71c1c;
+    }
+    .add-account-btn {
+      padding: 4px 10px;
+      background: #555;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    .add-account-btn:hover {
+      background: #333;
+    }
   </style>
 </head>
 <body>
@@ -102,8 +130,9 @@
   <label for="clientSecret">Client Secret</label>
   <input type="password" id="clientSecret" placeholder="e.g. xyz789...">
 
-  <label for="accountId">Account ID</label>
-  <input type="text" id="accountId" placeholder="e.g. 00000000-..." value="00000000-0000-0000-0000-000000000000">
+  <label>Account IDs</label>
+  <div id="accountIdsList"></div>
+  <button id="addAccountId" class="add-account-btn" type="button">+ Add</button>
 
   <div class="btn-row">
     <button id="save">Save</button>

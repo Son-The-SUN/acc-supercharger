@@ -18,7 +18,7 @@ async function getAccCredentials() {
       } else if (response?.error) {
         reject(new Error(response.error));
       } else {
-        resolve({ token: response.token, accountId: response.accountId });
+        resolve({ token: response.token, accountIds: response.accountIds || [] });
       }
     });
   });
@@ -31,18 +31,24 @@ async function getAccCredentials() {
  * Fetch all account users. Delegates to lib/users-api.js UsersAPI.fetchAll().
  */
 async function fetchAllUsers() {
-  const { token, accountId } = await getAccCredentials();
-  return UsersAPI.fetchAll(token, accountId);
+  const { token, accountIds } = await getAccCredentials();
+  const results = await Promise.allSettled(
+    accountIds.map((id) => UsersAPI.fetchAll(token, id))
+  );
+  return results.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
 }
 
 /**
  * Fetch all account projects. Delegates to lib/projects-api.js ProjectsAPI.fetchAll().
  */
 async function fetchAllProjects() {
-  const { token, accountId } = await getAccCredentials();
-  const projects = await ProjectsAPI.fetchAll(token, accountId);
+  const { token, accountIds } = await getAccCredentials();
+  const results = await Promise.allSettled(
+    accountIds.map((id) => ProjectsAPI.fetchAll(token, id))
+  );
+  const projects = results.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
   console.log(
-    `ACC Enhancer: fetched ${projects.length} projects`,
+    `ACC Enhancer: fetched ${projects.length} projects across ${accountIds.length} hub(s)`,
     `(platforms: ${[...new Set(projects.map((p) => p.platform))].join(", ")})`
   );
   return projects;
@@ -52,9 +58,12 @@ async function fetchAllProjects() {
  * Fetch all account companies. Delegates to lib/companies-api.js CompaniesAPI.fetchAll().
  */
 async function fetchAllCompanies() {
-  const { token, accountId } = await getAccCredentials();
-  const companies = await CompaniesAPI.fetchAll(token, accountId);
-  console.log(`ACC Enhancer: fetched ${companies.length} companies`);
+  const { token, accountIds } = await getAccCredentials();
+  const results = await Promise.allSettled(
+    accountIds.map((id) => CompaniesAPI.fetchAll(token, id))
+  );
+  const companies = results.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
+  console.log(`ACC Enhancer: fetched ${companies.length} companies across ${accountIds.length} hub(s)`);
   return companies;
 }
 
@@ -62,8 +71,11 @@ async function fetchAllCompanies() {
  * Search companies by name. Delegates to lib/companies-api.js CompaniesAPI.searchByName().
  */
 async function searchCompanyByName(companyName) {
-  const { token, accountId } = await getAccCredentials();
-  return CompaniesAPI.searchByName(token, accountId, companyName);
+  const { token, accountIds } = await getAccCredentials();
+  const results = await Promise.allSettled(
+    accountIds.map((id) => CompaniesAPI.searchByName(token, id, companyName))
+  );
+  return results.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
 }
 
 // ── Project-level fetchers ─────────────────────────────────────────────
@@ -87,14 +99,19 @@ async function fetchProjectMembers(projectId) {
  * primary endpoint returns nothing — this covers ACC-platform projects.
  */
 async function fetchProjectCompanies(projectId) {
-  const { token, accountId } = await getAccCredentials();
+  const { token, accountIds } = await getAccCredentials();
 
-  // Primary: HQ v1 endpoint (lib/companies-api.js)
-  const allCompanies = await CompaniesAPI.fetchProjectCompanies(token, accountId, projectId);
-  console.log(`ACC Enhancer: total project companies = ${allCompanies.length}`);
-  if (allCompanies.length > 0) return allCompanies;
+  // Primary: try the HQ v1 endpoint for each configured account
+  for (const accountId of accountIds) {
+    const allCompanies = await CompaniesAPI.fetchProjectCompanies(token, accountId, projectId);
+    if (allCompanies.length > 0) {
+      console.log(`ACC Enhancer: total project companies = ${allCompanies.length}`);
+      return allCompanies;
+    }
+  }
 
-  // Fallback: derive companies from project member company IDs (ACC platform)
+  // Fallback: derive companies from project member company IDs (ACC platform).
+  // This endpoint is project-scoped and does not require an account ID.
   const membersUrl = `${APS_BASE_URL}/construction/admin/v1/projects/${projectId}/users?limit=200`;
   try {
     const resp = await fetch(membersUrl, {

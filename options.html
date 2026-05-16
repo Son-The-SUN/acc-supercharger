@@ -82,6 +82,35 @@
       color: #555;
       margin-top: 8px;
     }
+    .account-id-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+      align-items: center;
+    }
+    .account-id-row input {
+      flex: 1;
+    }
+    .remove-account-btn {
+      margin-top: 0;
+      padding: 6px 10px;
+      background: #e53935;
+      font-size: 14px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .remove-account-btn:hover {
+      background: #b71c1c;
+    }
+    .add-account-btn {
+      margin-top: 4px;
+      padding: 5px 14px;
+      background: #555;
+      font-size: 13px;
+    }
+    .add-account-btn:hover {
+      background: #333;
+    }
   </style>
 </head>
 <body>
@@ -94,8 +123,10 @@
   <label for="clientSecret">APS Client Secret</label>
   <input type="password" id="clientSecret" placeholder="e.g. xyz789...">
 
-  <label for="accountId">APS Account ID</label>
-  <input type="text" id="accountId" placeholder="e.g. 00000000-0000-0000-0000-000000000000" value="00000000-0000-0000-0000-000000000000">
+  <label>APS Account IDs</label>
+  <p class="desc" style="margin-top:0">Add one entry per hub. All share the same Client ID and Secret above.</p>
+  <div id="accountIdsList"></div>
+  <button id="addAccountId" class="add-account-btn" type="button">+ Add Account</button>
 
   <button id="save">Save</button>
   <div id="status"></div>
